@@ -1,0 +1,85 @@
+---
+import Icon from './Icon.astro';
+import { labels, projectPath, number, date, safeUrl, type Project } from '../lib/types';
+interface Props {
+  project: Project;
+}
+const { project: p } = Astro.props;
+const repo = p.source === 'github';
+---
+
+<article
+  class:list={['project-card', p.source]}
+  data-card
+  data-source={p.source}
+  data-owner={p.owner.toLowerCase()}
+  data-search={`${p.name} ${p.description} ${p.owner} ${p.language || ''} ${(p.topics || []).join(' ')}`.toLowerCase()}
+  data-archived={String(!!p.archived)}
+  data-updated={p.updated || ''}
+  data-stars={p.stars || 0}
+  data-name={p.name.toLowerCase()}
+>
+  <div class="card-top">
+    <div class:list={['app-icon', p.source]}>
+      <Icon name={repo ? 'github' : p.source === 'vscode' ? 'code' : 'box'} size={27} />
+      {safeUrl(p.icon) && (
+        <img
+          src={p.icon}
+          alt=""
+          loading="lazy"
+          width="56"
+          height="56"
+          referrerpolicy="no-referrer"
+        />
+      )}
+    </div>
+    <span class="platform">{labels[p.source]}</span>
+  </div>
+  <h3>
+    <a href={projectPath(p)}>{p.name}</a>
+  </h3>
+  <p class="description">{p.description}</p>
+  <div class="card-owner">
+    {p.owner}
+    {p.version && <span>v{p.version}</span>}
+  </div>
+  <div class="card-bottom">
+    <span class="card-meta">
+      {repo ? (
+        <>
+          <Icon name="star" size={14} />
+          {number(p.stars)}
+          {p.language && (
+            <span class="language" data-language={p.language}>
+              {p.language}
+            </span>
+          )}
+        </>
+      ) : p.downloads != null ? (
+        <>
+          <Icon name="box" size={14} />
+          {number(p.downloads)}{' '}
+          {p.source === 'edge' ? 'users' : p.source === 'vscode' ? 'installs' : 'downloads'}
+        </>
+      ) : (
+        <>
+          <Icon name="clock" size={14} />
+          {p.updated ? date(p.updated) : 'Public listing'}
+        </>
+      )}
+    </span>
+    <a class="view-link" href={projectPath(p)} aria-label={`View ${p.name}`}>
+      View <Icon name="arrow" size={14} />
+    </a>
+  </div>
+  {(p.archived || p.fork) && (
+    <div class="repo-badges">
+      {p.archived && (
+        <span class="tag archived">
+          <Icon name="archive" size={12} /> Archived
+        </span>
+      )}
+      {p.fork && <span class="tag">Fork</span>}
+    </div>
+  )}
+</article>

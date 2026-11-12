@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<Layout title="About the makers">
+  <section class="page-heading">
+    <span class="eyebrow">HELLO, WE'RE GLAD YOU'RE HERE</span>
+    <h1>
+      Good ideas deserve
+      <br />a little home.
+    </h1>
+    <p>
+      Kira Store brings our extensions, packages, and open source work together. Find something
+      useful, discover how it works, and follow what comes next.
+    </p>
+  </section>
+  <div class="two-column">
+    {['kirasync2748', 'nayandas69'].map((name, i) => (
+      <section class="glass-panel maker-card">
+        <div class:list={['maker-orb', i === 1 && 'alternate']}>{name.charAt(0).toUpperCase()}</div>
+        <h2>{name}</h2>
+        <p>Explore public projects, see what’s new, and get to know the work behind the tools.</p>
+        <a
+          class="button secondary"
+          href={`https://github.com/${name}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub profile <Icon name="arrow" size={16} />
+        </a>
+        <a class="text-link" href={`/repositories?owner=${name}`}>
+          Browse repositories →
+        </a>
+      </section>
+    ))}
+  </div>
+  <section class="prose glass-panel">
+    <h2>A collection that keeps growing.</h2>
+    <p>
+      Listings come from VS Code Marketplace, Microsoft Edge Add-ons, npm, crates.io, PyPI, and
+      GitHub. New public projects appear as those services update their listings. Archived
+      repositories stay visible and are clearly marked.
+    </p>
+    <p>
+      Project names, icons, and descriptions belong to their creators. Installation and downloads
+      happen on the original platform.
+    </p>
+    <a class="text-link" href="/status">
+      See connected sources →
+    </a>
+  </section>
+</Layout>

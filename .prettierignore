@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+.wrangler/
+package-lock.json
+bun.lock
+README.md

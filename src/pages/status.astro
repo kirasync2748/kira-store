@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { catalog } from '../lib/catalog';
+import { labels, date } from '../lib/types';
+const sources = await catalog();
+const healthy = sources.filter((s) => s.state === 'ok' || s.state === 'empty').length;
+---
+
+<Layout title="Source status" noindex>
+  <section class="page-heading">
+    <span class="eyebrow">CONNECTED TO THE SOURCE</span>
+    <h1>A little transparency.</h1>
+    <p>
+      Live account availability across the collection. {healthy} of {sources.length} accounts
+      responded successfully.
+    </p>
+  </section>
+  <section class="status-grid">
+    {sources.map((s) => (
+      <article class="glass-panel source-card">
+        <div class="source-title">
+          <h2>{labels[s.provider]}</h2>
+          <span class:list={['tag', s.state]}>
+            <span
+              class:list={[
+                'status-dot',
+                (s.state === 'error' || s.state === 'stale' || s.state === 'degraded') && 'warning',
+              ]}
+            ></span>
+            {s.state === 'ok'
+              ? 'Connected'
+              : s.state === 'empty'
+                ? 'No public listings'
+                : s.state === 'degraded'
+                  ? 'Partial listing'
+                  : s.state === 'stale'
+                    ? 'Saved listing'
+                    : 'Unavailable'}
+          </span>
+        </div>
+        <p class="source-username">{s.username}</p>
+        <p>
+          {s.message ||
+            `${s.items.length} public ${s.items.length === 1 ? 'project' : 'projects'} found.`}
+        </p>
+        <small>
+          Last checked: {date(s.checked)} · {new Date(s.checked).toISOString().slice(11, 16)} UTC
+        </small>
+      </article>
+    ))}
+  </section>
+  <section class="prose glass-panel">
+    <h2>How updates work</h2>
+    <p>
+      Sources are checked when someone visits, with a five minute cache on each server instance. The
+      hosting platform can also cache successful pages for five minutes. Marketplace search indexes
+      may take longer to include newly published projects.
+    </p>
+    <p>
+      If a source cannot respond, the rest of the collection remains available. A previously fetched
+      listing may be shown as saved while it is retried. Empty accounts, missing accounts, and
+      source failures are shown separately.
+    </p>
+    <a class="button secondary" href="/status">
+      Check again
+    </a>
+  </section>
+</Layout>

@@ -1,0 +1,14 @@
+# Add one provider: username per line. Duplicates are ignored.
+# Provider aliases: rust = crates.io; python = PyPI.
+vscode: kirasync2748
+vscode: extrise
+edge: kirasync2748
+edge: nayandas69
+npm: kirasync2748
+npm: nayandas69
+rust: nayandas69
+rust: kirasync2748
+python: nayandas
+python: kirasync2748
+github: nayandas69
+github: kirasync2748

@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+Astro.response.status = 500;
+---
+
+<Layout title="Something went wrong" noindex>
+  <section class="error-state">
+    <span class="error-code">500</span>
+    <h1>A moment to regroup.</h1>
+    <p>Something went wrong on our side. Please try again in a moment.</p>
+    <div class="detail-actions">
+      <a href="/" class="button primary">
+        Try again
+      </a>
+      <a href="/status" class="button secondary">
+        Source status
+      </a>
+    </div>
+  </section>
+</Layout>

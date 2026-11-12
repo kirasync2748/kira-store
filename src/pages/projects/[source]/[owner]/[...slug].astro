@@ -1,0 +1,21 @@
+---
+import { decodeParam } from '../../../../lib/types';
+import Detail from '../../../../components/Detail.astro';
+import { catalog } from '../../../../lib/catalog';
+const { source, owner, slug: rawSlug } = Astro.params;
+const slug = decodeParam(rawSlug);
+const results = await catalog();
+const account = results.find(
+  (r) =>
+    r.provider === source &&
+    r.username.toLowerCase() === owner?.toLowerCase() &&
+    r.provider !== 'github',
+);
+const project = account?.items.find((p) => p.slug === slug);
+const unavailable =
+  !project &&
+  (account?.state === 'error' || account?.state === 'stale' || account?.state === 'degraded');
+Astro.response.status = project ? 200 : unavailable ? 503 : 404;
+---
+
+<Detail project={project} unavailable={unavailable} />

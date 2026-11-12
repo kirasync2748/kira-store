@@ -1,0 +1,158 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from './Icon.astro';
+import { labels, date, number, safeUrl, type Project } from '../lib/types';
+interface Props {
+  project?: Project;
+  unavailable?: boolean;
+}
+const { project: p, unavailable = false } = Astro.props;
+---
+
+<Layout
+  title={p?.name || (unavailable ? 'Source unavailable' : 'Project not found')}
+  description={p?.description}
+  noindex={!p}
+>
+  {p ? (
+    <>
+      <a class="back-link" href={p.source === 'github' ? '/repositories' : '/projects'}>
+        ← Back to {p.source === 'github' ? 'repositories' : 'the collection'}
+      </a>
+      <section class="detail-hero">
+        <div class:list={['app-icon', 'large', p.source]}>
+          <Icon name={p.source === 'github' ? 'github' : 'box'} size={43} />
+          {safeUrl(p.icon) && (
+            <img src={p.icon} width="96" height="96" alt="" referrerpolicy="no-referrer" />
+          )}
+        </div>
+        <span class="eyebrow">
+          {labels[p.source]} · {p.owner}
+        </span>
+        <h1>{p.name}</h1>
+        <p>{p.description}</p>
+        <div class="detail-actions">
+          <a href={p.url} class="button primary" target="_blank" rel="noopener noreferrer">
+            {p.source === 'github' ? 'View on GitHub' : `Open on ${labels[p.source]}`}{' '}
+            <Icon name="arrow" size={17} />
+          </a>
+          {p.homepage && (
+            <a href={p.homepage} class="button secondary" target="_blank" rel="noopener noreferrer">
+              Visit website <Icon name="arrow" size={17} />
+            </a>
+          )}
+        </div>
+        {p.archived && (
+          <div class="archived-notice">
+            <Icon name="archive" /> Archived repository. The owner has made this project read only.
+          </div>
+        )}
+      </section>
+      <div class="detail-grid">
+        <section class="glass-panel">
+          <h2>Project details</h2>
+          <dl>
+            <div>
+              <dt>Creator</dt>
+              <dd>{p.owner}</dd>
+            </div>
+            <div>
+              <dt>Platform</dt>
+              <dd>{labels[p.source]}</dd>
+            </div>
+            {p.version && (
+              <div>
+                <dt>Version</dt>
+                <dd>{p.version}</dd>
+              </div>
+            )}
+            <div>
+              <dt>Last updated</dt>
+              <dd>{date(p.updated)}</dd>
+            </div>
+            {p.language && (
+              <div>
+                <dt>Language</dt>
+                <dd>{p.language}</dd>
+              </div>
+            )}
+            {p.license && (
+              <div>
+                <dt>License</dt>
+                <dd>{p.license}</dd>
+              </div>
+            )}
+            {p.stars != null && (
+              <div>
+                <dt>Stars</dt>
+                <dd>{number(p.stars)}</dd>
+              </div>
+            )}
+            {p.forks != null && (
+              <div>
+                <dt>Forks</dt>
+                <dd>{number(p.forks)}</dd>
+              </div>
+            )}
+            {p.downloads != null && (
+              <div>
+                <dt>
+                  {p.source === 'edge'
+                    ? 'Active users'
+                    : p.source === 'vscode'
+                      ? 'Installs'
+                      : 'Downloads'}
+                </dt>
+                <dd>{number(p.downloads)}</dd>
+              </div>
+            )}
+            {p.source === 'github' && (
+              <div>
+                <dt>Status</dt>
+                <dd>
+                  {p.archived ? 'Archived' : 'Active'}
+                  {p.fork ? ' · Fork' : ''}
+                </dd>
+              </div>
+            )}
+          </dl>
+        </section>
+        <section class="glass-panel">
+          <span class="eyebrow">STRAIGHT FROM THE SOURCE</span>
+          <h2>Keep exploring.</h2>
+          <p>
+            Find documentation, release notes, and the latest details on the original project page.
+          </p>
+          <a class="text-link" href={p.url} target="_blank" rel="noopener noreferrer">
+            Open original listing <Icon name="arrow" size={17} />
+          </a>
+          {p.topics && p.topics.length > 0 && (
+            <div class="topics">
+              {p.topics.map((t) => (
+                <span class="tag">{t}</span>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </>
+  ) : (
+    <section class="error-state">
+      <span class="error-code">{unavailable ? '503' : '404'}</span>
+      <h1>{unavailable ? 'A little pause.' : 'This project wandered off.'}</h1>
+      <p>
+        {unavailable
+          ? 'The source is temporarily unavailable. Please check its status and try again.'
+          : 'This project may have moved, been removed, or never existed here.'}
+      </p>
+      <div class="detail-actions">
+        <a href="/projects" class="button primary">
+          Explore the collection
+        </a>
+        <a href="/status" class="button secondary">
+          Source status
+        </a>
+      </div>
+    </section>
+  )}
+</Layout>

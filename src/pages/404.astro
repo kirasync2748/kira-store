@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+Astro.response.status = 404;
+---
+
+<Layout title="Page not found" noindex>
+  <section class="error-state">
+    <span class="error-code">404</span>
+    <h1>A little off the map.</h1>
+    <p>The page you’re looking for may have moved. Let’s find you something useful.</p>
+    <div class="detail-actions">
+      <a href="/" class="button primary">
+        Back to discover
+      </a>
+      <a href="/projects" class="button secondary">
+        Explore projects
+      </a>
+    </div>
+  </section>
+</Layout>

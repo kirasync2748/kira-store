@@ -1,0 +1,179 @@
+---
+import ProjectCard from './ProjectCard.astro';
+import Icon from './Icon.astro';
+import { labels, type Project } from '../lib/types';
+interface Props {
+  items: Project[];
+  repositories?: boolean;
+}
+const { items, repositories = false } = Astro.props;
+const owners = [...new Set(items.map((p) => p.owner))].sort();
+---
+
+<section data-catalog>
+  <div class="catalog-toolbar">
+    <label class="search-field">
+      <Icon name="search" size={19} />
+      <input
+        type="search"
+        name="q"
+        placeholder={repositories ? 'Search repositories…' : 'Find your next favorite tool…'}
+        aria-label={repositories ? 'Search repositories' : 'Search projects'}
+        autocomplete="off"
+      />
+    </label>
+    <div class="selects">
+      <label class="sr-only" for="owner">
+        Publisher
+      </label>
+      <select id="owner" name="owner">
+        <option value="all">All creators</option>
+        {owners.map((o) => (
+          <option value={o.toLowerCase()}>{o}</option>
+        ))}
+      </select>
+      {repositories && (
+        <>
+          <label class="sr-only" for="archive">
+            Repository status
+          </label>
+          <select id="archive" name="archive">
+            <option value="all">All repositories</option>
+            <option value="false">Active</option>
+            <option value="true">Archived</option>
+          </select>
+        </>
+      )}
+      <label class="sr-only" for="sort">
+        Sort projects
+      </label>
+      <select id="sort" name="sort">
+        <option value="updated">Recently updated</option>
+        <option value="name">Name: A–Z</option>
+        {repositories && <option value="stars">Most stars</option>}
+      </select>
+    </div>
+  </div>
+  {!repositories && (
+    <div class="filter-chips" role="group" aria-label="Filter by platform">
+      <button data-filter="all" aria-pressed="true">
+        All projects
+      </button>
+      {(['vscode', 'edge', 'npm', 'rust', 'python'] as const).map((s) => (
+        <button data-filter={s} aria-pressed="false">
+          {labels[s]}
+          <span>{items.filter((p) => p.source === s).length}</span>
+        </button>
+      ))}
+    </div>
+  )}
+  <div class="result-label">
+    <span data-result-count aria-live="polite">
+      {items.length} {repositories ? 'repositories' : 'projects'}
+    </span>
+    <span>One collection. Always growing.</span>
+  </div>
+  <h2 class="sr-only">{repositories ? 'Repository results' : 'Project results'}</h2>
+  <div class="project-grid" data-grid>
+    {items.map((p) => (
+      <ProjectCard project={p} />
+    ))}
+  </div>
+  <div class="empty-state" data-empty hidden={items.length > 0}>
+    <Icon name="search" size={32} />
+    <h2>No {repositories ? 'repositories' : 'projects'} found</h2>
+    <p>
+      {items.length
+        ? 'Try a different search or clear your filters.'
+        : 'Check source status for account availability and try again later.'}
+    </p>
+    {items.length > 0 ? (
+      <button class="button secondary" data-reset>
+        Clear filters
+      </button>
+    ) : (
+      <a class="button secondary" href="/status">
+        Source status
+      </a>
+    )}
+  </div>
+</section>
+<script>
+  const root = document.querySelector<HTMLElement>('[data-catalog]');
+  if (root) {
+    const search = root.querySelector<HTMLInputElement>('[name=q]')!,
+      owner = root.querySelector<HTMLSelectElement>('[name=owner]')!,
+      sort = root.querySelector<HTMLSelectElement>('[name=sort]')!,
+      archive = root.querySelector<HTMLSelectElement>('[name=archive]');
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-card]')],
+      buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    let source = 'all';
+    const params = new URLSearchParams(location.search);
+    search.value = params.get('q') || '';
+    const initialSource = params.get('source');
+    if (buttons.some((b) => b.dataset.filter === initialSource)) source = initialSource!;
+    const setOption = (el: HTMLSelectElement, key: string) => {
+      const v = params.get(key);
+      if (v && [...el.options].some((o) => o.value === v)) el.value = v;
+    };
+    setOption(owner, 'owner');
+    setOption(sort, 'sort');
+    if (archive) setOption(archive, 'archive');
+    function update() {
+      let count = 0;
+      const q = search.value.toLowerCase().trim();
+      cards.sort((a, b) =>
+        sort.value === 'name'
+          ? a.dataset.name!.localeCompare(b.dataset.name!)
+          : sort.value === 'stars'
+            ? Number(b.dataset.stars) - Number(a.dataset.stars)
+            : b.dataset.updated!.localeCompare(a.dataset.updated!),
+      );
+      const grid = root!.querySelector('[data-grid]')!;
+      for (const card of cards) {
+        card.hidden = !(
+          (source === 'all' || card.dataset.source === source) &&
+          (owner.value === 'all' || card.dataset.owner === owner.value) &&
+          (!archive || archive.value === 'all' || card.dataset.archived === archive.value) &&
+          (!q || card.dataset.search!.includes(q))
+        );
+        if (!card.hidden) count++;
+        grid.append(card);
+      }
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === source)));
+      root!.querySelector('[data-result-count]')!.textContent =
+        `${count} ${archive ? 'repositories' : 'projects'}`;
+      root!.querySelector<HTMLElement>('[data-empty]')!.hidden = count > 0;
+      const url = new URL(location.href);
+      for (const [key, value] of Object.entries({
+        q: search.value,
+        source,
+        owner: owner.value,
+        sort: sort.value,
+        archive: archive?.value || 'all',
+      })) {
+        if (value && value !== 'all' && !(key === 'sort' && value === 'updated'))
+          url.searchParams.set(key, value);
+        else url.searchParams.delete(key);
+      }
+      history.replaceState(null, '', url);
+    }
+    search.addEventListener('input', update);
+    [owner, sort, archive].forEach((el) => el?.addEventListener('change', update));
+    buttons.forEach((b) =>
+      b.addEventListener('click', () => {
+        source = b.dataset.filter!;
+        update();
+      }),
+    );
+    root.querySelector('[data-reset]')?.addEventListener('click', () => {
+      search.value = '';
+      owner.value = 'all';
+      sort.value = 'updated';
+      source = 'all';
+      if (archive) archive.value = 'all';
+      update();
+    });
+    update();
+  }
+</script>

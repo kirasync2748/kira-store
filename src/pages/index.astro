@@ -1,0 +1,160 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import SourceNotice from '../components/SourceNotice.astro';
+import { allProjects } from '../lib/catalog';
+import { labels, projectPath } from '../lib/types';
+const { items, sources } = await allProjects();
+const packages = items.filter((p) => p.source !== 'github'),
+  repos = items.filter((p) => p.source === 'github' && !p.archived);
+const featured =
+  packages.find((p) => p.source === 'vscode' && p.owner === 'kirasync2748') || packages[0];
+---
+
+<Layout>
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">
+        <span class="status-dot"></span> A LITTLE PLACE FOR BIG IDEAS
+      </div>
+      <h1>
+        Made for your
+        <br />
+        <span>digital world.</span>
+      </h1>
+      <p>
+        Thoughtful extensions, useful packages, and open source ideas. Everything we make, together
+        in one place.
+      </p>
+      <div class="hero-actions">
+        <a href="/projects" class="button primary">
+          Explore the collection <Icon name="arrow" size={17} />
+        </a>
+        <a href="/repositories" class="text-link">
+          Browse repositories →
+        </a>
+      </div>
+      <div class="hero-platforms">
+        <span>
+          <Icon name="code" size={15} /> VS Code
+        </span>
+        <span>
+          <Icon name="globe" size={15} /> Edge
+        </span>
+        <span>npm</span>
+        <span>Rust</span>
+        <span>Python</span>
+      </div>
+    </div>
+    <a class="hero-feature" href={featured ? projectPath(featured) : '/projects'}>
+      <div class="feature-kicker">
+        IN THE SPOTLIGHT <span>{featured ? labels[featured.source] : 'THE COLLECTION'}</span>
+      </div>
+      <div class="feature-art" aria-hidden="true">
+        <div class="glass-square square-back"></div>
+        <div class="glass-square square-front">
+          <Icon name="spark" size={72} />
+        </div>
+        <div class="orbit-dot"></div>
+      </div>
+      <div class="feature-copy">
+        <h2>{featured?.name || 'Your next favorite tool.'}</h2>
+        <p>{featured?.description || 'Small projects. New possibilities.'}</p>
+        <span class="feature-button">
+          Discover project <Icon name="arrow" size={16} />
+        </span>
+      </div>
+    </a>
+  </section>
+  <div class="collection-stats">
+    <div>
+      <strong>{packages.length}</strong>
+      <span>extensions & packages</span>
+    </div>
+    <div>
+      <strong>{repos.length}</strong>
+      <span>active repositories</span>
+    </div>
+    <div>
+      <strong>5</strong>
+      <span>places to discover</span>
+    </div>
+    <a href="/status">
+      <span class="status-dot"></span> Connected to the source <Icon name="arrow" size={14} />
+    </a>
+  </div>
+  <section class="home-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">A LITTLE SOMETHING FOR EVERYONE</span>
+        <h2>Find your next favorite.</h2>
+        <p>Made to make your everyday a little better.</p>
+      </div>
+      <a href="/projects" class="text-link">
+        View all projects <Icon name="arrow" size={16} />
+      </a>
+    </div>
+    <SourceNotice sources={sources.filter((s) => s.provider !== 'github')} />
+    <div class="project-grid">
+      {packages.slice(0, 6).map((p) => (
+        <ProjectCard project={p} />
+      ))}
+    </div>
+    {packages.length === 0 && (
+      <div class="empty-state">
+        <h3>The collection is taking a moment.</h3>
+        <p>Check account availability on the source status page.</p>
+        <a href="/status" class="button secondary">
+          Source status
+        </a>
+      </div>
+    )}
+  </section>
+  <section class="platform-section">
+    <div>
+      <span class="eyebrow">WHEREVER YOU WORK</span>
+      <h2>A home for every kind of idea.</h2>
+      <p>From your editor to your browser, and everything in between.</p>
+    </div>
+    <div class="platform-links">
+      {(['vscode', 'edge', 'npm', 'rust', 'python'] as const).map((s) => (
+        <a href={`/projects?source=${s}`}>
+          <span class:list={['mini-icon', s]}>
+            <Icon name={s === 'vscode' ? 'code' : 'box'} size={19} />
+          </span>
+          {labels[s]}
+          <Icon name="arrow" size={15} />
+        </a>
+      ))}
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">OPEN SOURCE, OPEN POSSIBILITIES</span>
+        <h2>Behind the projects.</h2>
+        <p>Explore the code, follow an idea, or make it your own.</p>
+      </div>
+      <a href="/repositories" class="text-link">
+        All repositories <Icon name="arrow" size={16} />
+      </a>
+    </div>
+    <div class="project-grid">
+      {repos.slice(0, 3).map((p) => (
+        <ProjectCard project={p} />
+      ))}
+    </div>
+  </section>
+  <section class="maker-banner">
+    <div class="maker-orb">K</div>
+    <div>
+      <span class="eyebrow">BUILT WITH CARE</span>
+      <h2>Small tools. Real people.</h2>
+      <p>A growing collection from kirasync2748, nayandas69, and friends.</p>
+    </div>
+    <a href="/about" class="button secondary">
+      Meet the makers <Icon name="arrow" size={16} />
+    </a>
+  </section>
+</Layout>

@@ -1,0 +1,19 @@
+---
+import type { SourceResult } from '../lib/types';
+interface Props {
+  sources: SourceResult[];
+}
+const failed = Astro.props.sources.filter(
+  (s) => s.state === 'error' || s.state === 'stale' || s.state === 'degraded',
+);
+---
+
+{failed.length > 0 && (
+  <aside class="source-notice">
+    <span class="status-dot warning"></span>
+    <p>
+      {failed.length} {failed.length === 1 ? 'account needs' : 'accounts need'} another check.
+      Available projects are shown below. <a href="/status">View source status →</a>
+    </p>
+  </aside>
+)}

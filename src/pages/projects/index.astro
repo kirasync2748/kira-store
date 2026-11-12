@@ -1,0 +1,17 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Catalog from '../../components/Catalog.astro';
+import SourceNotice from '../../components/SourceNotice.astro';
+import { allProjects } from '../../lib/catalog';
+const { items, sources } = await allProjects();
+---
+
+<Layout title="The collection">
+  <section class="page-heading">
+    <span class="eyebrow">LITTLE TOOLS. BIG POSSIBILITIES.</span>
+    <h1>The collection.</h1>
+    <p>Extensions for your workflow. Packages for your next idea.</p>
+  </section>
+  <SourceNotice sources={sources.filter((s) => s.provider !== 'github')} />
+  <Catalog items={items.filter((p) => p.source !== 'github')} />
+</Layout>

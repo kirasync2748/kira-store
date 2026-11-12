@@ -1,0 +1,17 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Catalog from '../../components/Catalog.astro';
+import SourceNotice from '../../components/SourceNotice.astro';
+import { allProjects } from '../../lib/catalog';
+const { items, sources } = await allProjects();
+---
+
+<Layout title="Open source repositories">
+  <section class="page-heading">
+    <span class="eyebrow">BUILT IN THE OPEN</span>
+    <h1>Ideas, with the source.</h1>
+    <p>Repositories from nayandas69 and kirasync2748. Explore, learn, and contribute.</p>
+  </section>
+  <SourceNotice sources={sources.filter((s) => s.provider === 'github')} />
+  <Catalog items={items.filter((p) => p.source === 'github')} repositories />
+</Layout>
