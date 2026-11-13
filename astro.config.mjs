@@ -11,7 +11,7 @@ try {
 }
 const target = process.env.DEPLOY_TARGET ?? 'node';
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://kira-store.example',
+  site: process.env.SITE_URL || 'https://kira-store-gamma.vercel.app',
   output: 'server',
   session: false,
   adapter:
